@@ -1,0 +1,19 @@
+% % NOTES
+
+% Different specification comparison
+% 'N,F3dB1,F3dB2'                -> Only IIR design (butter)
+% 'N,F3dB1,F3dB2,Ap'             -> Only IIR design (cheby1)
+% 'N,F3dB1,F3dB2,Ast'            -> Only IIR designs (cheby2 and ellip)
+% 'N,F3dB1,F3dB2,Ast1,Ap,Ast2'   -> Only IIR design (ellip)
+% 'N,F3dB1,F3dB2,BWp'            -> Only IIR design (cheby1)
+% 'N,F3dB1,F3dB2,BWst'           -> Only IIR design (cheby2)
+% 'N,Fc1,Fc2'                    -> Only FIR design (window)
+% 'N,Fc1,Fc2,Ast1,Ap,Ast2'       -> Only FIR design (fircls)
+% 'N,Fp1,Fp2,Ap'                 -> Only IIR design (cheby1)
+% 'N,Fp1,Fp2,Ast1,Ap,Ast2'       -> Only IIR design (ellip)
+% 'N,Fst1,Fp1,Fp2,Fst2'          -> Both IIR and FIR designs (iirlpnorm,
+%                                   equiripple, firls)
+% 'N,Fst1,Fp1,Fp2,Fst2,Ap'       -> Only IIR design (ellip)
+% 'N,Fst1,Fp1,Fp2,Fst2,C'        -> Only FIR design (equiripple)
+% 'N,Fst1,Fst2,Ast'              -> Only IIR design (cheby2)
+% 'Nb,Na,Fst1,Fp1,Fp2,Fst2'      -> Only IIR design (iirlpnorm)
