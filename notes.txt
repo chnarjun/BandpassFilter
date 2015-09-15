@@ -12,7 +12,7 @@
 % 'N,Fp1,Fp2,Ap'                 -> Only IIR design (cheby1)
 % 'N,Fp1,Fp2,Ast1,Ap,Ast2'       -> Only IIR design (ellip)
 % 'N,Fst1,Fp1,Fp2,Fst2'          -> Both IIR and FIR designs (iirlpnorm,
-%                                   equiripple, firls)
+%                                   equiripple, firls)  % FIR designs did not converge for N = 1000
 % 'N,Fst1,Fp1,Fp2,Fst2,Ap'       -> Only IIR design (ellip)
 % 'N,Fst1,Fp1,Fp2,Fst2,C'        -> Only FIR design (equiripple)
 % 'N,Fst1,Fst2,Ast'              -> Only IIR design (cheby2)
