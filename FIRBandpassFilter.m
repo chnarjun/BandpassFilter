@@ -1,8 +1,8 @@
 classdef FIRBandpassFilter < dsp.private.AbstractSampleRateEngine
     
     properties (Nontunable)
-        CenterFrequency = 4e3;
-        Bandwidth = 8e3;
+        CenterFrequency = 10e3;
+        Bandwidth = 4e3;
         FilterOrder = 50;
         PassbandRipple = 0.1;
         StopbandAttenuation = 80;
@@ -61,6 +61,10 @@ classdef FIRBandpassFilter < dsp.private.AbstractSampleRateEngine
             end
             F = clone(obj.FilterObj);
         end
+        function fvtool(obj)
+            FIR = getFilter(obj);
+            fvtool(FIR,'Fs',obj.SampleRate);
+        end
     end
     
     methods(Access = protected)
@@ -80,7 +84,7 @@ classdef FIRBandpassFilter < dsp.private.AbstractSampleRateEngine
             FIR = getFilter(lpf);
             b = FIR.Numerator;
             wc = obj.CenterFrequency*2/Fs;
-            L = size(b,1);
+            L = size(b,2);
             b = 2*cos(pi*wc*(-(L-1)/2:(L-1)/2)).*b;
             FIR.Numerator = b;
             obj.FilterObj = FIR;
