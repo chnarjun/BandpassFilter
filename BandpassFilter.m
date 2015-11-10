@@ -80,6 +80,14 @@ classdef BandpassFilter < dsp.private.LPHPFilterBase
         %   property applies when you set the DesignForMinimumOrder
         %   property to true. The default value of this property is 12 kHz.
         Bandwidth = 4e3;
+        
+        StopbandFrequency1 = 3e3;
+        PassbandFrequency1 = 5e3;
+        PassbandFrequency2 = 8e3;
+        StopbandFrequency2 = 12e3;
+        StopbandAttenuation1 = 80;
+        StopbandAttenuation2 = 60;
+        
     end
     
     methods
@@ -104,6 +112,39 @@ classdef BandpassFilter < dsp.private.LPHPFilterBase
             obj.Bandwidth = Fst;
             needToDesignFilters(obj);
         end
+        
+        function set.StopbandFrequency1(obj,Fst1)
+            validateattributes(Fst1,{'numeric'},...
+            {'finite','scalar','real',...
+                'positive'},'');
+            obj.StopbandFrequency1 = Fst1;
+            needToDesignFilters(obj);
+        end
+        
+        function set.PassbandFrequency1(obj,Fp1)
+            validateattributes(Fp1,{'numeric'},...
+            {'finite','scalar','real',...
+                'positive'},'');
+            obj.PassbandFrequency1 = Fp1;
+            needToDesignFilters(obj);
+        end
+        
+        function set.PassbandFrequency2(obj,Fp2)
+            validateattributes(Fp2,{'numeric'},...
+            {'finite','scalar','real',...
+                'positive'},'');
+            obj.PassbandFrequency2 = Fp2;
+            needToDesignFilters(obj);
+        end
+        
+        function set.StopbandFrequency2(obj,Fst2)
+            validateattributes(Fst2,{'numeric'},...
+            {'finite','scalar','real',...
+                'positive'},'');
+            obj.StopbandFrequency2 = Fst2;
+            needToDesignFilters(obj);
+        end
+        
     end
     %----------------------------------------------------------------------
     methods (Access = protected)
@@ -111,24 +152,32 @@ classdef BandpassFilter < dsp.private.LPHPFilterBase
         function b = computeFIRCoefficients(obj)
             Fs = getSampleRate(obj);
             
-            Fp = obj.Bandwidth/2;
-            Fpn = Fp./(Fs/2);
             Ap = obj.PassbandRipple;
             Rp = (10.^(Ap./20) - 1)./...
                 (10.^(Ap./20) + 1);
-            Ast = obj.StopbandAttenuation;
-            Rs = 10.^(-Ast./20);
             
             if obj.DesignForMinimumOrder
-                Fstn= Fpn+0.05; % TBD
-                b = firgr('minorder',[0 Fpn Fstn 1],[1 1 0 0 ],[Rp,Rs]);
+                Fst1 = obj.StopbandFrequency1./(Fs/2);
+                Fp1 = obj.PassbandFrequency1./(Fs/2);
+                Fp2 = obj.PassbandFrequency2./(Fs/2);
+                Fst2 = obj.StopbandFrequency2./(Fs/2);
+                Ast1 = obj.StopbandAttenuation1;
+                Rs1 = 10.^(-Ast1./20);
+                Ast2 = obj.StopbandAttenuation2;
+                Rs2 = 10.^(-Ast2./20);
+                b = firgr('minorder',[0 Fst1 Fp1 Fp2 Fst2 1],[0 0 1 1 0 0],...
+                    [Rs1,Rp,Rs2]);
             else
+                Ast = obj.StopbandAttenuation;
+                Rs = 10.^(-Ast./20);
+                Fp = obj.Bandwidth/2;
+                Fpn = Fp./(Fs/2);
                 N  = obj.FilterOrder;
                 b = firceqrip(N,Fpn,[Rp,Rs],'passedge');
+                wc = obj.CenterFrequency*2/Fs;
+                L = size(b,2);
+                b = 2*cos(pi*wc*(-(L-1)/2:(L-1)/2)).*b;
             end
-            wc = obj.CenterFrequency*2/Fs;
-            L = size(b,2);
-            b = 2*cos(pi*wc*(-(L-1)/2:(L-1)/2)).*b;
         end
         
         function designFilter(obj,u)
@@ -298,6 +347,22 @@ classdef BandpassFilter < dsp.private.LPHPFilterBase
             
         end
         
+        function flag = isInactivePropertyImpl(obj, prop)
+            flag = isInactivePropertyImpl@dsp.private.LPHPFilterBase(obj, prop);
+            minord = obj.DesignForMinimumOrder;
+            switch prop
+                case {'StopbandFrequency1','StopbandFrequency2',...
+                      'PassbandFrequency1','PassbandFrequency2',...
+                      'StopbandAttenuation1','StopbandAttenuation2'}
+                    if ~minord
+                        flag = true;
+                    end
+                case {'CenterFrequency','Bandwidth'}
+                    if minord
+                        flag = true;
+                    end
+            end
+        end
          % Block Icon
         function icon = getIconImpl(~)
             iconStr = getString(message('dsp:system:HPLPFilter:LPBlockIcon'));
@@ -329,8 +394,14 @@ classdef BandpassFilter < dsp.private.LPHPFilterBase
                 'FilterOrder', ...
                 'CenterFrequency', ...
                 'Bandwidth', ...
+                'StopbandFrequency1',...
+                'PassbandFrequency1',...
+                'PassbandFrequency2',...
+                'StopbandFrequency2',...
+                'StopbandAttenuation1',...
                 'PassbandRipple', ...
                 'StopbandAttenuation',...
+                'StopbandAttenuation2',...
                 'InheritSampleRate',...
                 'SampleRate'};
         end
