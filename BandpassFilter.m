@@ -161,6 +161,16 @@ classdef BandpassFilter < dsp.private.LPHPFilterBase
                 Fp1 = obj.PassbandFrequency1./(Fs/2);
                 Fp2 = obj.PassbandFrequency2./(Fs/2);
                 Fst2 = obj.StopbandFrequency2./(Fs/2);
+                % Adjust frequencies to maintain same transition width both
+                % sides
+                TW1 = Fp1 - Fst1;
+                TW2 = Fst2 - Fp2;
+                designTW = min(TW1,TW2);
+                if TW1 ~= designTW
+                    Fst1 = Fp1-designTW;
+                elseif TW2 ~= designTW
+                    Fst2 = designTW+Fp2;
+                end
                 Ast1 = obj.StopbandAttenuation1;
                 Rs1 = 10.^(-Ast1./20);
                 Ast2 = obj.StopbandAttenuation2;
@@ -357,7 +367,7 @@ classdef BandpassFilter < dsp.private.LPHPFilterBase
                     if ~minord
                         flag = true;
                     end
-                case {'CenterFrequency','Bandwidth'}
+                case {'CenterFrequency','Bandwidth','StopbandAttenuation'}
                     if minord
                         flag = true;
                     end
